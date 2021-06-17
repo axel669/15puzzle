@@ -1,4 +1,5 @@
 <script>
+    import {onMount} from "svelte"
     import AppStyle from "svelte-doric/core/app-style"
     import baseline from "svelte-doric/core/baseline"
     import theme from "svelte-doric/core/theme/tron"
@@ -9,13 +10,23 @@
 
     let size = null
     let measure = null
-    $: size = Math.max(
-        0,
-        Math.min(
-            measure?.getBoundingClientRect().width / 4,
-            measure?.getBoundingClientRect().height / 4
+
+    const debounce = (func, limit) => {
+        let id = null
+        return () => {
+            clearTimeout(id)
+            id = setTimeout(func, limit)
+        }
+    }
+    const recalc = () => {
+        const rect = document.body.getBoundingClientRect()
+        size = Math.min(
+            rect.width / 4,
+            (rect.height - 68) / 4,
+            160
         )
-    )
+    }
+    onMount(recalc)
 
     const solvedList = Array.from(
         {length: 16},
@@ -144,17 +155,14 @@
 </script>
 
 <style>
-    screen-measure {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-    }
-
     app-layout {
         display: grid;
         grid-template-columns: 1fr;
+        grid-template-rows: 32px calc(var(--size) * 4) 32px;
         gap: 2px;
+        width: calc(var(--size) * 4);
+        margin: auto;
+        transition: width 100ms linear;
     }
 
     game-board {
@@ -187,16 +195,16 @@
     }
 </style>
 
+<svelte:window on:resize={debounce(recalc, 250)} />
+
 <AppStyle {baseline} {theme} />
 
-<screen-measure bind:this={measure} />
-
-<app-layout>
+<app-layout style="--size: {size}px;">
     <Button on:tap={scramble} variant="fill" color="secondary">
         Scramble Board
     </Button>
 
-    <game-board style="--size: {size}px;">
+    <game-board>
         {#each pieceArray as [value, {x, y,}] (value)}
             {#if value !== "0"}
                 <game-piece

@@ -35,8 +35,8 @@
     }
 </style>
 
-{#if current > 0}
-    <div>
+<div>
+    {#if current > 0}
         {format(current)}
-    </div>
-{/if}
+    {/if}
+</div>
