@@ -1,3 +1,3 @@
 export default {
-    name: "Application Name"
+    name: "Axel's 15 Puzzle"
 }
